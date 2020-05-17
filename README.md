@@ -4,7 +4,9 @@
 
 This project creates a sensor that tracks when the HVAC filter is changed, and sends an alert when it needs to be changed 90 days later.
 
-This sensor uses a Wyze sense door sensor to trigger the automation when the filter cover is opened, but any door sensor can be used. I set up the the Wyze sensors using this integration: (https://github.com/kevinvincent/ha-wyzesense)
+I'm using a Wyze sense door sensor to trigger the automation when the filter cover is opened, but any door sensor can be used. I set up the the Wyze sensors using this integration: (https://github.com/kevinvincent/ha-wyzesense)
+
+![Air Filter Actionable Notification](https://i.imgur.com/dlOt5QC.jpg)
 
 I used one of HA’s helpers to set up a input_datetime entity. I created this in the UI by going to Configuration/Helpers and clicking the add button, then “Date and/or time.” I then added a name, in my case “Air Filter Date Installed”. This entity will be used to set the date that the air filter was changed so that data can be sent to a python script. 
 
@@ -30,7 +32,8 @@ ios:
 
 ## The Python Script:
 
-I modified this project by mf-social https://github.com/mf-social/ps-date-countdown to change the calculation to 90 days from the current date, instead of a yearly occurrence. It requires an automation to run the script every day or each time HA is restarted in order to update the countdown, and to set the parameters of the reminder.
+I modified this project by mf-social https://github.com/mf-social/ps-date-countdown to change the calculation to 90 days from the current date, instead of a yearly occurrence. It requires an automation to run the script every day or each time HA is restarted in order to update the countdown, and to set the parameters of the reminder. The script must be placed in the /config/python_scripts/ directory. (Create it if it doesn't exist - I created a new file called 'date_countdown.py' in this directory and populated it with the following code:
+
 
 ## /config/python_scripts/date_countdown.py
 
@@ -86,7 +89,14 @@ hass.states.set(sensorName , numberOfDays ,
   }
 )
 ```
-
+Change the following section in the script to change the amount of days in your countdown.
+```
+nextOccur = date + datetime.timedelta(days=90)
+```
+For example, for 30 days, change this section to:
+```
+nextOccur = date + datetime.timedelta(days=30)
+```
 # Automations:
 
 The first automation will run the python script once a day at the start of the day, or when HA is restarted, and will set the python script data for date, name, and type.
@@ -106,6 +116,9 @@ The first automation will run the python script once a day at the start of the d
   initial_state: true
 ```
 Next we need an automation to trigger an actionable notification when the HVAC filter cover is opened. This is triggered by the Wyze door sensor, and prompts me to confirm the filter was changed. If you wanted, you could skip the actionable notification and just have the sensor trigger set the date that the filter was changed directly (essentially combining this automation with the next), but I wanted to have the extra control in case the filter cover was opened for any other reason.
+
+![Air Filter Actionable Notification](https://i.imgur.com/bh9380X.jpg)
+
 ```
 - alias: Air Filter - Open Detected - Send iOS Actionable Notification
   description: ''
@@ -164,4 +177,42 @@ Lastly, I need an automation that reminds me when the countdown is done and I ne
   - data:
       message: The AC Filter is due to be changed.
     service: notify.mobile_app_iphone
+```
+## Air Filter Sensor Card
+To add a custom card in lovelace, I created the following sensor using the picture-elements card
+![Air Filter Sensor Card](https://i.imgur.com/YNYpnG3.jpg)
+```
+elements:
+  - entity: input_datetime.air_filter_date_installed
+    style:
+      bottom: 52%
+      color: black
+      font-size: 26px
+      left: 4.5%
+      transform: initial
+    type: state-label
+  - entity: sensor.reminder_air_filter
+    style:
+      bottom: 6%
+      color: black
+      font-size: 26px
+      left: 4.5%
+      transform: initial
+    type: state-label
+  - entity: automation.reminder_refresh_date_countdown_sensors
+    state_image:
+      'off': 'https://i.imgur.com/jsXMqex.png'
+      'on': 'https://i.imgur.com/jsXMqex.png’
+    style:
+      left: 80%
+      top: 50%
+      width: 25%
+    tap_action:
+      action: call-service
+      service: automation.trigger
+      service_data:
+        entity_id: automation.reminder_refresh_date_countdown_sensors
+    type: image
+image: 'https://i.imgur.com/OutUp0O.png’'
+type: picture-elements
 ```
