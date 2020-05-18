@@ -109,7 +109,9 @@ Lastly, I need an automation that reminds me when the countdown is done and I ne
       condition:
       - below: '1'
         condition: numeric_state
-        entity_id: sensor.reminder_air_filter
+        entity_id: input_datetime.air_filter_date_installed
+        value_template: '{{(((as_timestamp(states.input_datetime.air_filter_date_installed.state)
+          + (90 * 86400) ) - as_timestamp(states.sensor.date.state)) /86400)|round(0)}}'
       - condition: zone
         entity_id: person.me
         zone: zone.home
@@ -141,7 +143,7 @@ To add a custom card in lovelace, I created the following sensor using the pictu
           left: 4.5%
           transform: initial
         type: state-label
-      - entity: automation.reminder_refresh_date_countdown_sensors
+      - entity: automation.air_filter_set_date
         state_image:
           'off': 'https://i.imgur.com/jsXMqex.png'
           'on': 'https://i.imgur.com/jsXMqex.png’
@@ -150,10 +152,7 @@ To add a custom card in lovelace, I created the following sensor using the pictu
           top: 50%
           width: 25%
         tap_action:
-          action: call-service
-          service: automation.trigger
-          service_data:
-            entity_id: automation.reminder_refresh_date_countdown_sensors
+          action: none
         type: image
     image: 'https://i.imgur.com/OutUp0O.png’'
     type: picture-elements
