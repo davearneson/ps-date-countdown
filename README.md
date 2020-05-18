@@ -6,9 +6,7 @@ This project creates a sensor that tracks when the HVAC filter is changed, and s
 
 I'm using a Wyze sense door sensor to trigger the automation when the filter cover is opened, but any door sensor can be used. I set up the the Wyze sensors using this integration: ([https://github.com/kevinvincent/ha-wyzesense](https://github.com/kevinvincent/ha-wyzesense))
 
-&#x200B;
-
-https://preview.redd.it/889lwwlqrez41.jpg?width=2345&format=pjpg&auto=webp&s=d260b43be4fb77a00be84f8028693e39cade1872
+![Air Filter Open Sensor](https://i.imgur.com/dlOt5QC.jpg)
 
 I used one of HA’s helpers to set up a input\_datetime entity. I created this in the UI by going to Configuration/Helpers and clicking the add button, then “Date and/or time.” I then added a name, in my case “Air Filter Date Installed”. This entity will be used to set the date that the air filter was changed so that data can be sent to a python script.
 
@@ -51,9 +49,11 @@ ios:
 
 # About the template sensor:
 
-I really struggled with this part in the original project, and after posting on Reddit, received some much appreciated guidance from u/DER31K which can be seen in the comments below. Essentially, I couldn't figure out how to get a template to add 90 days to a date, but if you convert the date to a timestamp, it becomes much easier to work with. This bypasses the need for the python script entirely, and makes this whole project much simpler. u/DER31K's template is explained below. 86400 is seconds in a day.
+I really struggled with this part in the original project, and after posting on [Reddit](https://www.reddit.com/r/homeassistant/comments/glpqmu/tracking_hvac_filter_with_home_assistant/), received some much appreciated guidance from u/DER31K which can be seen in the comments of the linked post. Essentially, I couldn't figure out how to get a template to add 90 days to a date, but if you convert the date to a timestamp, it becomes much easier to work with. This bypasses the need for the python script entirely, and makes this whole project much simpler. u/DER31K's template is explained below. 86400 is seconds in a day.
 
+```
 {{(((as_timestamp(states.input_datetime.air_filter_date_installed.state) + (90 * 86400) ) - as_timestamp(states.sensor.date.state)) /86400)|round(0)}}
+```
 
 So this is.... Date filter last changed + 90 days - today's date = days until the next filter change based on it needing be to done 90 days after the last filter change.
 
@@ -61,9 +61,7 @@ So this is.... Date filter last changed + 90 days - today's date = days until th
 
 The first automation will send an actionable notification when the HVAC filter cover is opened. This is triggered by the Wyze door sensor, and prompts me to confirm the filter was changed. If you wanted, you could skip the actionable notification and just have the sensor trigger set the date that the filter was changed directly (essentially combining this automation with the next), but I wanted to have the extra control in case the filter cover was opened for any other reason.
 
-&#x200B;
-
-https://preview.redd.it/syr36tatrez41.jpg?width=828&format=pjpg&auto=webp&s=4dca6d07a789b2c707bb3c9dfce84a9c4522cbc1
+![Air Filter Actionable Notification](https://i.imgur.com/bh9380X.jpg)
 
     - alias: Air Filter - Open Detected - Send iOS Actionable Notification
       description: ''
@@ -124,9 +122,7 @@ Lastly, I need an automation that reminds me when the countdown is done and I ne
 
 To add a custom card in lovelace, I created the following sensor using the picture-elements card. 
 
-&#x200B;
-
-https://preview.redd.it/culwd8bwrez41.jpg?width=828&format=pjpg&auto=webp&s=8a561d892f34fb34528f6d79724393f0eb1eb2e2
+![Air Filter Sensor Card](https://i.imgur.com/YNYpnG3.jpg)
 
     elements:
       - entity: input_datetime.air_filter_date_installed
