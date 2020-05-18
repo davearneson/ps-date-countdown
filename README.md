@@ -8,7 +8,7 @@ I'm using a Wyze sense door sensor to trigger the automation when the filter cov
 
 ![Air Filter Open Sensor](https://i.imgur.com/dlOt5QC.jpg)
 
-I used one of HA’s helpers to set up a input\_datetime entity. I created this in the UI by going to Configuration/Helpers and clicking the add button, then “Date and/or time.” I then added a name, in my case “Air Filter Date Installed”. This entity will be used to set the date that the air filter was changed so that data can be sent to a python script.
+I used one of HA’s helpers to set up a input\_datetime entity. I created this in the UI by going to Configuration/Helpers and clicking the add button, then “Date and/or time.” I then added a name, in my case “Air Filter Date Installed”. This entity will be used to set the date that the air filter was changed.
 
 A template sensor needs to be set up in order to calculate the days after an input date, and there will also be an actionable push notification on iOS, so configuration.yaml must include the following:
 
