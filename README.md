@@ -12,9 +12,8 @@ I used one of HA’s helpers to set up a input\_datetime entity. I created this 
 
 A template sensor needs to be set up in order to calculate the days after an input date, and there will also be an actionable push notification on iOS, so configuration.yaml must include the following:
 
-```
 ## configuration.yaml:
-
+```
 ### Required Sensors ###
 sensor:
 - platform: time_date
